@@ -103,7 +103,6 @@ class Game:
         self.sfx['ambience'].play(-1)
         
         while True:
-            print(self.input_function)
             self.display.fill((0, 0, 0, 0))
             self.display_2.blit(self.assets['background'], (0, 0))
             

@@ -1,8 +1,9 @@
 import sympy as sp
 
-ALLOWED_INPUTS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "e", "l", "n", "|", "(", ")", "/", "+", "-", "*"]
+ALLOWED_INPUTS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "e", "l", "n", "|", "(", ")", "/", "+", "-", "*", " "]
 
-
+def clean_input(string):
+    clean_function = string.replace(" ","")
 class Calculate_Derivative:
     def differentiate(function):
         x = sp.symbols('x')
