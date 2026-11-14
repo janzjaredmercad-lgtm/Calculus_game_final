@@ -6,11 +6,12 @@ import random
 import pygame
 
 from scripts.utils import load_image, load_images, Animation
-from scripts.entities import PhysicsEntity, Player, Enemy
+from scripts.entities import  Player, Enemy
 from scripts.tilemap import Tilemap
 from scripts.clouds import Clouds
 from scripts.particle import Particle
 from scripts.spark import Spark
+from scripts.calculations import ALLOWED_INPUTS
 
 class Game:
     def __init__(self):
@@ -20,6 +21,7 @@ class Game:
         self.screen = pygame.display.set_mode((640, 480))
         self.display = pygame.Surface((320, 240), pygame.SRCALPHA)
         self.display_2 = pygame.Surface((320, 240))
+        self.input_function = ""
 
         self.clock = pygame.time.Clock()
         
@@ -98,10 +100,10 @@ class Game:
         pygame.mixer.music.load('data/music.wav')
         pygame.mixer.music.set_volume(0.5)
         pygame.mixer.music.play(-1)
-        
         self.sfx['ambience'].play(-1)
         
         while True:
+            print(self.input_function)
             self.display.fill((0, 0, 0, 0))
             self.display_2.blit(self.assets['background'], (0, 0))
             
@@ -158,18 +160,7 @@ class Game:
                         self.sparks.append(Spark(projectile[0], random.random() - 0.5 + (math.pi if projectile[1] > 0 else 0), 2 + random.random()))
                 elif projectile[2] > 360:
                     self.projectiles.remove(projectile)
-                elif abs(self.player.dashing) < 50:
-                    if self.player.rect().collidepoint(projectile[0]):
-                        self.projectiles.remove(projectile)
-                        self.dead += 1
-                        self.sfx['hit'].play()
-                        self.screenshake = max(16, self.screenshake)
-                        for i in range(30):
-                            angle = random.random() * math.pi * 2
-                            speed = random.random() * 5
-                            self.sparks.append(Spark(self.player.rect().center, angle, 2 + random.random()))
-                            self.particles.append(Particle(self, 'particle', self.player.rect().center, velocity=[math.cos(angle + math.pi) * speed * 0.5, math.sin(angle + math.pi) * speed * 0.5], frame=random.randint(0, 7)))
-                        
+               
             for spark in self.sparks.copy():
                 kill = spark.update()
                 spark.render(self.display, offset=render_scroll)
@@ -194,19 +185,30 @@ class Game:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT:
+                    if event.key in [pygame.K_LEFT, pygame.K_a]:
                         self.movement[0] = True
-                    if event.key == pygame.K_RIGHT:
+                    if event.key in [pygame.K_RIGHT, pygame.K_d]:
                         self.movement[1] = True
-                    if event.key == pygame.K_UP:
+                    if event.key in [pygame.K_UP, pygame.K_w]:
                         if self.player.jump():
                             self.sfx['jump'].play()
-                    if event.key == pygame.K_x:
-                        self.player.dash()
+                    if event.unicode in ALLOWED_INPUTS:
+                        self.input_function += event.unicode
+                    if event.key == pygame.K_BACKSPACE:
+                        if len(self.input_function) > 0:
+                            self.input_function = self.input_function[:-1]
+                    if event.key == pygame.K_DELETE:
+                        if len(self.input_function) > 0:
+                            self.input_function = ""
+                    if event.key == pygame.K_RETURN:
+                        self.input_function = ""
+                        pass
+                        
+
                 if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_LEFT:
+                    if event.key in [pygame.K_LEFT, pygame.K_a]:
                         self.movement[0] = False
-                    if event.key == pygame.K_RIGHT:
+                    if event.key in [pygame.K_RIGHT, pygame.K_d]:
                         self.movement[1] = False
                         
             if self.transition:
