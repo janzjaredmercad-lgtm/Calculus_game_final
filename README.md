@@ -10,8 +10,8 @@ Controls:
 - Delete: clear the answer
 - q: open or close the formula guide
 
-- Use `^` for powers. Both `2*x` and `2x` work. For example, enter `2x`
-for the derivative of `x^2`. Exponentials use `e^x`. Supported functions include
-`sin`, `cos`, `tan`, `log`, and `sqrt`.
-
-
+Rules:
+- Use `^` for powers. Both `2*x` and `2x` work, Ex: enter `2x`
+- Use () to group the expression for the power, Ex: 2^3x -> 2^(3x)
+- Use of * is only required if left or right of it are both letters, Ex: xe^(2x) -> x*e^(2x)
+- Put powers last if a function is made up of letters, Ex: sec(x)^2

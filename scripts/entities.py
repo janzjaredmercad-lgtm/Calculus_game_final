@@ -4,7 +4,7 @@ import random
 import pygame
 import sympy as sp
 
-from scripts.calculations import check_derivative, differentiate, format_expression, parse_expression
+from scripts.calculations import check_derivative, differentiate, format_expression_entity, parse_expression
 from scripts.spark import Spark
 
 
@@ -81,7 +81,7 @@ class Enemy(PhysicsEntity):
         self.walking = 0
         if kind == "polynomial":
             self.max_health = None
-        if kind == "hybrid":
+        if kind in ["hybrid", "boss_exponential", "boss_logarithmic"]:
             self.max_health = 1
         if kind in ["exponential", "trigonometric", "logarithmic"]:
             self.max_health = 2
@@ -157,7 +157,7 @@ class Enemy(PhysicsEntity):
         surf.blit(gun, (gun_x - offset[0], self.rect().centery - offset[1]))
 
         label = self.game.font_small.render(
-            format_expression(self.function),
+            format_expression_entity(self.function),
             True, (255, 255, 255)
         )
         label_x = self.rect().centerx - label.get_width() // 2 - offset[0]

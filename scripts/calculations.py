@@ -1,221 +1,109 @@
 import sympy as sp
-
+from sympy.parsing.sympy_parser import (
+    parse_expr,
+    standard_transformations,
+    implicit_multiplication_application,
+    convert_xor,
+)
 
 x = sp.symbols("x")
 
-# These are the only function calls the player can type.
 FUNCTIONS = {
     "sin": sp.sin,
     "cos": sp.cos,
     "tan": sp.tan,
+    "cot": sp.cot,
+    "sec": sp.sec,
+    "csc": sp.csc,
     "log": sp.log,
     "sqrt": sp.sqrt,
+    "e": sp.E,
+    "pi": sp.pi,
+    "x": x,
+    "ln": sp.log
 }
 
 DERIVATIVE_FORMULAS = (
     "d/dx x^n = n*x^(n-1)",
     "d/dx c = 0",
     "d/dx e^x = e^x",
+    "d/dx a^x = a^x*ln(a)",
+    "d/dx a^u = u'(a^(u) ln(a))", 
     "d/dx sin(x) = cos(x)",
     "d/dx cos(x) = -sin(x)",
-    "d/dx tan(x) = 1/cos(x)^2",
+    "d/dx tan(x) = sec(x)^2",
+    "d/dx cot(x) = -csc(x)^2",
+    "d/dx sec(x) = sec(x)tan(x)",
+    "d/dx csc(x) = -csc(x)cot(x)",
     "d/dx log(x) = 1/x",
-    "Product rule: (u*v)' = u*v' +  u'*v",
-    "Use * for multiplication; 2x is also accepted.",
-    "Example answer: 2*x",
+    "Product rule: (u*v)' = u*v' + u'*v",
 )
 
-ALLOWED_INPUTS = set("acegilnopqrstx0123456789+-*/^().")
+ALLOWED_INPUTS = set("acegilnopqrstx0123456789+-*/^(). ")
 
 
 class InvalidExpression(ValueError):
-    """The expression uses a symbol or operation the game does not support."""
+    pass
 
+def parse_expression(text):
+    if isinstance(text, sp.Basic):
+        return text
 
-def _tokenize(text):
-    """Break the input into numbers, names, and math symbols."""
-    tokens = []
-    position = 0
+    text = str(text).strip()
 
-    while position < len(text):
-        character = text[position]
-
-        if character.isspace():
-            position += 1
-        elif character.isdigit() or character == ".":
-            start = position
-            while position < len(text) and (text[position].isdigit() or text[position] == "."):
-                position += 1
-            number = text[start:position]
-            if number == "." or number.count(".") > 1:
-                raise InvalidExpression("Check the number in the expression.")
-            tokens.append(number)
-        elif character.isalpha():
-            name = None
-            for allowed_name in ("sin", "cos", "tan", "log", "sqrt", "pi", "x", "e"):
-                if text.startswith(allowed_name, position):
-                    name = allowed_name
-                    break
-
-            if name is None:
-                start = position
-                while position < len(text) and text[position].isalpha():
-                    position += 1
-                tokens.append(text[start:position])
-            else:
-                tokens.append(name)
-                position += len(name)
-        elif character in "+-*/^()":
-            tokens.append(character)
-            position += 1
-        else:
+    for char in text:
+        if char not in ALLOWED_INPUTS:
             raise InvalidExpression("Use supported math symbols and functions.")
 
-    return tokens
+    rules = standard_transformations + (
+        implicit_multiplication_application,
+        convert_xor,
+    )
 
+    try:
+        expr = parse_expr(text, local_dict=FUNCTIONS, transformations=rules)
+    except Exception:
+        raise InvalidExpression("Check your expression and try again.")
+    for symbol in expr.free_symbols:
+        if symbol != x:
+            raise InvalidExpression("Only use x as your variable.")
 
-class ExpressionParser:
-    """Read math tokens and turn them into a SymPy expression."""
-
-    def __init__(self, text):
-        self.tokens = _tokenize(text)
-        self.position = 0
-
-    def _peek(self):
-        if self.position == len(self.tokens):
-            return None
-        return self.tokens[self.position]
-
-    def _take(self):
-        token = self._peek()
-        if token is None:
-            raise InvalidExpression("The expression ended too early.")
-        self.position += 1
-        return token
-
-    def parse(self):
-        result = self._parse_expression()
-        if self._peek() is not None:
-            raise InvalidExpression("Check the expression and use supported math.")
-        return result
-
-    def _parse_expression(self):
-        """Read additions and subtractions."""
-        result = self._parse_term()
-        while self._peek() in ("+", "-"):
-            operator = self._take()
-            right = self._parse_term()
-            if operator == "+":
-                result += right
-            else:
-                result -= right
-        return result
-
-    def _parse_term(self):
-        """Read multiplication and division, including shorthand like 2x."""
-        result = self._parse_factor()
-        while True:
-            token = self._peek()
-            if token in ("*", "/"):
-                operator = self._take()
-                right = self._parse_factor()
-            elif self._starts_factor(token):
-                operator = "*"
-                right = self._parse_factor()
-            else:
-                break
-
-            if operator == "/":
-                result /= right
-            else:
-                result *= right
-        return result
-
-    def _starts_factor(self, token):
-        if token is None:
-            return False
-        return (
-            token == "("
-            or token in ("x", "e", "pi")
-            or token in FUNCTIONS
-            or token[0].isdigit()
-            or token[0] == "."
-        )
-
-    def _parse_factor(self):
-        """Read a leading plus or minus, then a power."""
-        if self._peek() == "+":
-            self._take()
-            return self._parse_factor()
-        if self._peek() == "-":
-            self._take()
-            return -self._parse_factor()
-        return self._parse_power()
-
-    def _parse_power(self):
-        """Read a value and, optionally, its exponent."""
-        base = self._parse_primary()
-        if self._peek() == "^":
-            self._take()
-            exponent = self._parse_factor()
-            if exponent.free_symbols and base != sp.E:
-                raise InvalidExpression("Variable powers are only supported with base e.")
-            if not exponent.free_symbols and abs(float(exponent)) > 8:
-                raise InvalidExpression("Use a constant power from -8 to 8.")
-            return base ** exponent
-        return base
-
-    def _parse_primary(self):
-        """Read a number, variable, function, or parenthesized expression."""
-        token = self._take()
-
-        if token[0].isdigit() or token[0] == ".":
-            return sp.Rational(token)
-        if token == "x":
-            return x
-        if token == "e":
-            return sp.E
-        if token == "pi":
-            return sp.pi
-        if token == "(":
-            result = self._parse_expression()
-            if self._take() != ")":
-                raise InvalidExpression("Add a closing parenthesis.")
-            return result
-        if token in FUNCTIONS:
-            if self._peek() != "(":
-                raise InvalidExpression("Put the function input in parentheses.")
-            self._take()
-            argument = self._parse_expression()
-            if self._take() != ")":
-                raise InvalidExpression("Add a closing parenthesis.")
-            return FUNCTIONS[token](argument)
-
-        raise InvalidExpression("Use x, e, pi, or a supported function.")
-
-
-def parse_expression(expression):
-    """Convert a short math expression into a SymPy expression."""
-    if isinstance(expression, sp.Basic):
-        return expression
-    return ExpressionParser(str(expression)).parse()
+    return expr
 
 
 def differentiate(function):
-    """Return the derivative of a function with respect to x."""
-    return sp.diff(parse_expression(function), x)
+    expr = parse_expression(function)
+    return sp.diff(expr, x)
 
 
 def check_derivative(answer, function):
-    """Check whether an answer is mathematically equal to the derivative."""
     try:
-        difference = differentiate(function) - parse_expression(answer)
-        return sp.simplify(difference) == 0
-    except (TypeError, ValueError, OverflowError, RecursionError):
+        correct_ans = differentiate(function)
+        user_ans = parse_expression(answer)
+        
+        diff = sp.simplify(correct_ans - user_ans)
+        return diff == 0
+    except Exception:
         return False
 
 
 def format_expression(expression):
-    """Make SymPy expressions easier to read above enemies."""
-    text = str(expression).replace("**", "^")
-    return text.replace("exp(x)", "e^x")
+    text = str(expression)
+    text = text.replace("**", "^")
+    text = text.replace("exp(x)", "e^x")
+    for i in range(2, 10):
+        text = text.replace(f"exp({i}*x)", f"e^({i}*x)")
+    text = text.replace("tan(x)^2 + 1", "sec(x)^2")
+    text = text.replace("-cot(x)^2 - 1", "-csc(x)^2")
+    text = text.replace("log", "ln")
+    return text
+
+def format_expression_entity(expression):
+    text = str(expression)
+    text = text.replace("**", "^")
+    text = text.replace("exp(x)", "e^x")
+    for i in range(2, 10):
+        text = text.replace(f"exp({i}*x)", f"e^({i}*x)")
+    text = text.replace("tan(x)^2 + 1", "sec(x)^2")
+    text = text.replace("-cot(x)^2 - 1", "-csc(x)^2")
+    return text

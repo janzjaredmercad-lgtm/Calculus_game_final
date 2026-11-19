@@ -198,16 +198,16 @@ class Game:
         self.display.blit(message, message_rect)
 
     def draw_formula_help(self):
-        panel = pygame.Rect(86, 70, 468, 340)
+        panel = pygame.Rect(86, 10, 468, 380)
         pygame.draw.rect(self.display, (18, 21, 34), panel)
         pygame.draw.rect(self.display, (176, 194, 255), panel, 1)
         title = self.font.render("DERIVATIVE QUICK GUIDE", True, (255, 238, 160))
-        self.display.blit(title, (110, 86))
+        self.display.blit(title, (110, 20))
         for index, line in enumerate(DERIVATIVE_FORMULAS):
             image = self.font_small.render(line, True, (238, 240, 250))
-            self.display.blit(image, (110, 118 + index * 24))
-        close_text = self.font_small.render("Press O to close", True, (173, 193, 255))
-        self.display.blit(close_text, (110, 368))
+            self.display.blit(image, (110, 50 + index * 24))
+        close_text = self.font_small.render("Press q to close", True, (173, 193, 255))
+        self.display.blit(close_text, (110, 500))
 
     def run(self):
         pygame.mixer.music.load("data/music.wav")
