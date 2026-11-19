@@ -1,3 +1,7 @@
+Requirements:
+- Sympy library
+- Pygame library
+
 A 2D platform game where you solve derivatives to defeat function enemies.
 It uses Pygame for the game and SymPy to check answers.
 
