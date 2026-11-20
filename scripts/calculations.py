@@ -24,8 +24,8 @@ FUNCTIONS = {
 }
 
 DERIVATIVE_FORMULAS = (
-    "d/dx x^n = n*x^(n-1)",
-    "d/dx c = 0",
+    "d/dx x^n = n*x^(n-1)       Remember: ",
+    "d/dx c = 0                         -CHAIN RULE is inside times derivative of outside",
     "d/dx e^x = e^x",
     "d/dx a^x = a^x*ln(a)",
     "d/dx a^u = u'(a^(u) ln(a))", 

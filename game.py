@@ -173,7 +173,7 @@ class Game:
         pygame.draw.rect(self.display, (20, 22, 32), (8, 410, 624, 62))
         pygame.draw.rect(self.display, (112, 123, 158), (8, 410, 624, 62), 1)
         prompt = self.font_small.render(
-            "DERIVATIVE ANSWER (type, then ENTER)", True, (173, 193, 255)
+            "Type the derivative then hit enter", True, (173, 193, 255)
         )
         self.display.blit(prompt, (16, 418))
         answer = self.input_function[-38:] or "_"
@@ -207,7 +207,7 @@ class Game:
             image = self.font_small.render(line, True, (238, 240, 250))
             self.display.blit(image, (110, 50 + index * 24))
         close_text = self.font_small.render("Press q to close", True, (173, 193, 255))
-        self.display.blit(close_text, (110, 500))
+        self.display.blit(close_text, (110, 360))
 
     def run(self):
         pygame.mixer.music.load("data/music.wav")
