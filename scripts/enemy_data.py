@@ -8,7 +8,7 @@ LEVEL_ENEMIES = [
         ("exponential", "e^x"),
         ("trigonometric", "sin(2x+5)"),
         ("exponential", "x*e^x"),
-        ("trigonometric", "2x^2 + cos(x)"),
+        ("trigonometric", "2*x^2 + cos(x)"),
     ],
     [
         ("hybrid", "e^(2x) + tan(x) + 3log(x)"),

@@ -104,7 +104,7 @@ class Editor:
                             self.tile_variant = 0
                         if event.button == 5:
                             self.tile_group = (self.tile_group + 1) % len(self.tile_list)
-                            self.tile_variant = 0
+                            self.tile_variant = 0   
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         self.clicking = False
