@@ -81,11 +81,11 @@ class Enemy(PhysicsEntity):
         self.walking = 0
         if kind == "polynomial":
             self.max_health = None
-        if kind in ["hybrid", "boss_exponential", "boss_logarithmic"]:
+        if kind in ["weak_exponential", "weak_trigonometric", "weak_logarithmic", "hybrid"]:
             self.max_health = 1
         if kind in ["exponential", "trigonometric", "logarithmic"]:
             self.max_health = 2
-        if kind == "boss_trigonometric":
+        if kind == "boss":
             self.max_health = 6
         self.health = self.max_health
 

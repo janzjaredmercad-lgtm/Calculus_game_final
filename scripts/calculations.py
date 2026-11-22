@@ -35,7 +35,7 @@ DERIVATIVE_FORMULAS = (
     "d/dx cot(x) = -csc(x)^2",
     "d/dx sec(x) = sec(x)tan(x)",
     "d/dx csc(x) = -csc(x)cot(x)",
-    "d/dx log(x) = 1/x",
+    "d/dx ln(x) = 1/x",
     "Product rule: (u*v)' = u*v' + u'*v",
 )
 
@@ -91,6 +91,7 @@ def format_expression(expression):
     text = str(expression)
     text = text.replace("**", "^")
     text = text.replace("exp(x)", "e^x")
+    text = text.replace("7*exp(-2*x)", "7*e^(-2x)")
     for i in range(2, 10):
         text = text.replace(f"exp({i}*x)", f"e^({i}*x)")
     text = text.replace("tan(x)^2 + 1", "sec(x)^2")
@@ -102,6 +103,7 @@ def format_expression_entity(expression):
     text = str(expression)
     text = text.replace("**", "^")
     text = text.replace("exp(x)", "e^x")
+    text = text.replace("7*exp(-2*x)", "7*e^(-2x)")
     for i in range(2, 10):
         text = text.replace(f"exp({i}*x)", f"e^({i}*x)")
     text = text.replace("tan(x)^2 + 1", "sec(x)^2")
